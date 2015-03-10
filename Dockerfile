@@ -31,8 +31,8 @@ RUN wget ftp://ftp.atnf.csiro.au/pub/software/casacore/casacore-1.7.0.tar.bz2; \
 
 # install pyrap wrappers
 RUN apt-get install -y subversion libboost-python-dev scons
-RUN svn co http://pyrap.googlecode.com/svn/tags/pyrap-1.1.0 \
-    cd pyrap-1.1.0                                          \
+RUN svn co http://pyrap.googlecode.com/svn/tags/pyrap-1.1.0; \
+    cd pyrap-1.1.0;                                          \
     ./batchbuild.py --casacore-root=/usr --prefix=/usr
 
 # install purify
