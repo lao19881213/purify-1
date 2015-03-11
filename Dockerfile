@@ -39,6 +39,9 @@ RUN svn co http://pyrap.googlecode.com/svn/tags/pyrap-1.1.0; \
 RUN apt-get install -y libtiff5-dev
 RUN pip2.7 install git+https://github.com/UCL/purify.git@docker
 
+# add an ipython user
+RUN adduser ipython
+USER ipython
 # add notebook script
 RUN echo "ipython notebook --ip=0.0.0.0 --port=8888 --no-browser" > /usr/bin/notebook.sh; \
     chmod a+rx /usr/bin/notebook.sh
