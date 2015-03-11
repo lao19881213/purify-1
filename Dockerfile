@@ -40,8 +40,19 @@ RUN pip2.7 install git+https://github.com/UCL/purify.git@docker
 
 # add an ipython user
 RUN adduser ipython
+# add notebook directory in root
+RUN mkdir /notebooks && chown ipython /notebooks
+
+# Now switch to ipython user
 USER ipython
 # add notebook script
 RUN echo "ipython notebook --ip=0.0.0.0 --port=8888 --no-browser" > /usr/bin/notebook.sh; \
     chmod a+rx /usr/bin/notebook.sh
+# copy data and notebooks to workspace
+RUN git clone git+https://github.com/UCL/purify.git@docker; \
+    cp purify/scripts/* /notebooks;                         \
+    mkdir data;                                             \
+    cp -r purify/data/images purify/data/expected data;
+
+WORKDIR /notebooks
 CMD /usr/bin/notebook.sh
