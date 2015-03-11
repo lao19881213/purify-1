@@ -1,6 +1,5 @@
 FROM ipython/scipystack
 
-RUN [[ -e /build ]] || mkdir /build
 VOLUME /build
 WORKDIR /build
 
