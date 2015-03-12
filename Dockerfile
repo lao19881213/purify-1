@@ -51,4 +51,9 @@ RUN echo "ipython notebook --ip=0.0.0.0 --port=8888 --no-browser" > /usr/bin/not
 USER ipython
 
 WORKDIR /notebooks
+RUN git clone https://github.com/UCL/purify.git -b docker;  \
+    cp purify/scripts/*.ipynb /notebooks;                   \
+    mkdir data;                                             \
+    cp -r purify/data/images purify/data/expected data;
+
 CMD /usr/bin/notebook.sh
