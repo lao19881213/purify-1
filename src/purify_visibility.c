@@ -147,7 +147,6 @@ void purify_visibility_free(purify_visibility *vis) {
 
 }
 
-
 /*!
  * Compare two visibility objects to see whether they hold identical
  * data.

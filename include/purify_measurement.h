@@ -4,7 +4,7 @@
 #include "purify_config.h"
 
 /*!  
- * Structure storing parametrs for the interpolation operator.
+ * Structure storing parameters for the interpolation operator.
  *
  */
 typedef struct {
@@ -24,6 +24,27 @@ typedef struct {
   int kx; 
   
 } purify_measurement_cparam;
+
+
+/*!
+ * Structure storing parameters for the WSClean measurement operator.
+ *
+ */
+typedef struct {
+    /*! Measurement Set filename. */
+    const char *msFilename;
+    /*! Number of columns in the discrete image. */
+    unsigned int nx;
+    /*! Number of rows in the discrete image. */
+    unsigned int ny;
+    /*! Pixel scale in x. */
+    unsigned int pixelScalexX;
+    /*! Pixel scale in y. */
+    unsigned int pixelScaleY;
+    /*! String storing other flags that are read by WSClean. */
+    const char *wscleanFlags;
+
+} purify_WSClean_params;
 
 void purify_measurement_fft_real(void *out, 
 				 void *in, 
@@ -63,4 +84,11 @@ void purify_measurement_symcftfwd(void *out, void *in, void **data);
 
 void purify_measurement_symcftadj(void *out, void *in, void **data);
 
+void purify_measurement_init_cft(purify_sparsemat_row *mat,
+        double *deconv, complex double *shifts,
+        double *u, double *v,
+        purify_measurement_cparam *param);
+
+void  initialiseWSClean(purify_WSClean_params *wscleanParams, void **userdata);
+void finaliseWSClean(void *userdata);
 #endif
