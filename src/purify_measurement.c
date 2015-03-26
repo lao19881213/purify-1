@@ -1060,31 +1060,3 @@ void purify_measurement_symcftadj(void *out, void *in, void **data){
   }
 
 }
-
-
-/*!
- * Initialization for the WSClean measurement operator.
- *
- * \param[out] mat (purify_sparsemat_row*) Sparse matrix containing
- * the interpolation kernels for each visibility. The matrix is
- * stored in compressed row storage format.
- * \param[out] deconv (double*) Deconvolution kernel in real space
- * \param[out] shifts (complex double*) Vector with the shifts for computing
- *             centered Fourier transform.
- * \param[in] u (double*) u coodinates between -pi and pi
- * \param[in] v (double*) v coodinates between -pi and pi
- * \param[in] param structure storing information for the operator
- *
- * \authors Rafael Carrillo
- */
-
-void initialiseWSClean(purify_WSClean_params *wscleanParams, void **userdata)
-{
-
-  //call wsclean initialise
-}
-
-void finaliseWSClean(void *userdata) {
-  //call wsclean finalise
-
-}

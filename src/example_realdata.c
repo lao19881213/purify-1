@@ -241,14 +241,12 @@ int main(int argc, char *argv[]) {
   dataadj[4] = (void*)fft_temp2;
   dataadj[5] = (void*)shifts;
 
-
-  printf("FFT planing complete \n\n");
+  printf("FFT planning complete \n\n");
   
   // Copy measured visibilities to y.
   for (i=0; i < vis_test.nmeas; i++){
     y[i] =  vis_test.y[i]; 
-  } 
-
+  }
 
 // Rescale the measurements and deconv operator to improve speed of CG solver.
 

@@ -44,7 +44,7 @@ typedef struct {
     /*! String storing other flags that are read by WSClean. */
     const char *wscleanFlags;
 
-} purify_WSClean_params;
+} purify_interface_params;
 
 void purify_measurement_fft_real(void *out, 
 				 void *in, 
@@ -89,6 +89,4 @@ void purify_measurement_init_cft(purify_sparsemat_row *mat,
         double *u, double *v,
         purify_measurement_cparam *param);
 
-void  initialiseWSClean(purify_WSClean_params *wscleanParams, void **userdata);
-void finaliseWSClean(void *userdata);
 #endif
