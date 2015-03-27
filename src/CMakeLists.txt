@@ -55,7 +55,7 @@ set_target_properties( purify_about PROPERTIES
 target_link_libraries(purify_about libpurify)
 
 # Add WSClean
-add_executable(purify_wsclean ${WSCLEAN_SOURCE})
+add_executable(purify_wsclean ${WSCLEAN_SOURCE}  demo_wsclean.c)
 target_link_libraries(purify_wsclean libpurify libwsclean)
 
 # add test

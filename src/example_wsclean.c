@@ -15,8 +15,7 @@
 #include <assert.h>
 #include <purify_measurement.h>
 #include <purify_interfaces.h>
-//#include <CoreGraphics/CoreGraphics.h>
-//#include <Foundation/Foundation.h>
+
 #include <sopt_utility.h>
 #include <time.h> 
 #ifdef _OPENMP 
@@ -42,7 +41,9 @@
 #include "purify_measurement.h"
 #include "purify_interfaces.h"
 #include "wscleaninterface.h"
+
 #define VERBOSE 1
+
 int main(int argc, char *argv[]) {
     int i;
     double gamma=0.001;
