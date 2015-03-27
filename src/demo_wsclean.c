@@ -16,8 +16,6 @@
 //#include <Foundation/Foundation.h>
 #include <sopt_utility.h>
 #include <time.h>
-#include <CoreGraphics/CoreGraphics.h>
-#include <GLKit/GLKit.h>
 
 #ifdef _OPENMP
   #include <omp.h>
