@@ -43,9 +43,8 @@
 #include "purify_interfaces.h"
 #include "wscleaninterface.h"
 #define VERBOSE 1
-
 int main(int argc, char *argv[]) {
-    int i, j, Nx, Ny, Nr, Nb;
+    int i, j;
     int seedn=54;
     double sigma;
     double a;
@@ -62,29 +61,26 @@ int main(int argc, char *argv[]) {
     purify_image_filetype filetype_img;
     char filename_vis[PURIFY_STRLEN];
     char msFilename[PURIFY_STRLEN];
-    complex double *xinc;
     complex double *y0;
     complex double *y;
-    double *xout;
-    double *w;
-    complex double *xoutc;
-    double *dummyr;
-    complex double *dummyc;
+    //double *xout;
+    //complex double *xoutc;
+    //double *dummyr;
+    //complex double *dummyc;
 
 //JDM
-    double dx, umax, uscale; //dx in arc seconds
+    //double umax; //dx in arc seconds
     //double *vis_noise_std;
 
     //parameters for the continuous Fourier Transform
     double *deconv;
     purify_sparsemat_row gmat;
-    purify_visibility vis_test;
+    //purify_visibility vis_test;
     purify_measurement_cparam param_m1;
     purify_measurement_cparam param_m2;
     //WSCLEAN INTERFACE
     //char *msFilename;
     void *userdata;
-    double *weights = NULL;
     purify_domain_info wscleanParams;
     purify_domain_data_format wscleanFormat;
     //WSCLEAN INTERFACE
@@ -94,7 +90,6 @@ int main(int argc, char *argv[]) {
     void *dataadj[6];
     fftw_plan planfwd;
     fftw_plan planadj;
-    complex double *shifts;
 
 
     //Structures for sparsity operator
@@ -124,10 +119,10 @@ int main(int argc, char *argv[]) {
 //            filetype_vis);
 
     // Rescale the visibilities.
-//    dx = 0.3; // arcsec
+    double dx = 120; // arcsec
     dx = dx / 60.0 / 60.0 / 180.0 * PURIFY_PI; // convert to radians
-    umax = 1.0 / (2.0 * dx);
-    uscale = 2.0*PURIFY_PI / umax;
+    double umax = 1.0 / (2.0 * dx);
+    double uscale = 2.0*PURIFY_PI / umax;
 //    for (i=0; i < vis_test.nmeas; i++) {
 //        vis_test.u[i] = vis_test.u[i] * uscale;
 //        vis_test.v[i] = vis_test.v[i] * uscale;
@@ -143,8 +138,64 @@ int main(int argc, char *argv[]) {
 
 
 
+    //y = (complex double*)malloc((vis_test.nmeas) * sizeof(complex double));
+    //PURIFY_ERROR_MEM_ALLOC_CHECK(y);
+    //y0 = (complex double*)malloc((vis_test.nmeas) * sizeof(complex double));
+    //PURIFY_ERROR_MEM_ALLOC_CHECK(y0);
+    //w = (double*)malloc((Nr) * sizeof(double));
+    //PURIFY_ERROR_MEM_ALLOC_CHECK(w);
+    //shifts = (complex double*)malloc((vis_test.nmeas) * sizeof(complex double));
+    //PURIFY_ERROR_MEM_ALLOC_CHECK(shifts);
+
+
+//WSCLEAN OPERATOR
+    if(argc < 2) {
+      printf("Syntax: %s <ms>\n", argv[0]);
+      exit(-1);
+    }
+    wscleanParams.msPath = argv[1];
+    printf("Opening: %s\n", argv[1]);
+    wscleanParams.imageWidth = dimx;
+    wscleanParams.imageHeight = dimy;
+    wscleanParams.pixelScaleX = uscale;
+    wscleanParams.pixelScaleY = uscale;
+    wscleanParams.extraParameters = "-weight natural";
+    purify_interface_initialiseOperator(&userdata, &wscleanParams, &wscleanFormat);
+    int Ny = wscleanFormat.data_size;
+    y = malloc(Ny*sizeof(*y));
+    y0 = malloc(Ny*sizeof(*y0));
+    double *w = malloc(Ny*sizeof(double));
+    double* weights = malloc(Ny*sizeof(*weights));
+    purify_interface_readData(userdata, y, weights);
+    for (i=0;i<Ny;i++) y[i] *= weights[i];
+//WSCLEAN OPERATOR
+
+    // Define dimensional parameters.
+    int Nb = 9;
+    int Nx = dimx * dimy;
+    int Nr = Nb * Nx;
+
+    // Memory allocation for the different variables.
+    deconv = (double*)malloc((Nx) * sizeof(double));
+    PURIFY_ERROR_MEM_ALLOC_CHECK(deconv);
+    complex double* xinc = (complex double*)malloc((Nx) * sizeof(complex double));
+    PURIFY_ERROR_MEM_ALLOC_CHECK(xinc);
+    double* xout = (double*)malloc((Nx) * sizeof(double));
+    PURIFY_ERROR_MEM_ALLOC_CHECK(xout);
+    complex double* xoutc = (complex double*)malloc((Nx) * sizeof(complex double));
+    PURIFY_ERROR_MEM_ALLOC_CHECK(xoutc);
+    double* dummyr = malloc(Nr * sizeof(double));
+    PURIFY_ERROR_MEM_ALLOC_CHECK(dummyr);
+    complex double* dummyc = malloc(Nr * sizeof(complex double));
+    PURIFY_ERROR_MEM_ALLOC_CHECK(dummyc);
+
+    // x in complex
+    for (i=0; i < Nx; i++){
+        xinc[i] = 0.0 + 0.0*I;
+    }
+    
     // Define parameters for the convolutional gridding.
-    param_m1.nmeas = vis_test.nmeas;
+    param_m1.nmeas = Ny;
     param_m1.ny1 = dimy;
     param_m1.nx1 = dimx;
     param_m1.ofy = 1;  // Changing the oversampling factor from 2 to 1
@@ -154,68 +205,13 @@ int main(int argc, char *argv[]) {
 
     // Define parameters for the convolutional gridding.
 //JDM: remove one of these sets of convolution gridding parameters?
-    param_m2.nmeas = vis_test.nmeas;
+    param_m2.nmeas = Ny;
     param_m2.ny1 = dimy;
     param_m2.nx1 = dimx;
     param_m2.ofy = 1;
     param_m2.ofx = 1;
     param_m2.ky = 24;
     param_m2.kx = 24;
-
-    // Define dimensional parameters.
-    Nb = 9;
-    Nx = dimx * dimy;
-    Nr = Nb * Nx;
-    Ny = vis_test.nmeas;
-
-
-    // Memory allocation for the different variables.
-    deconv = (double*)malloc((Nx) * sizeof(double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(deconv);
-    xinc = (complex double*)malloc((Nx) * sizeof(complex double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(xinc);
-    xout = (double*)malloc((Nx) * sizeof(double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(xout);
-    y = (complex double*)malloc((vis_test.nmeas) * sizeof(complex double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(y);
-    y0 = (complex double*)malloc((vis_test.nmeas) * sizeof(complex double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(y0);
-    w = (double*)malloc((Nr) * sizeof(double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(w);
-    xoutc = (complex double*)malloc((Nx) * sizeof(complex double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(xoutc);
-    shifts = (complex double*)malloc((vis_test.nmeas) * sizeof(complex double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(shifts);
-
-
-    dummyr = malloc(Nr * sizeof(double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(dummyr);
-    dummyc = malloc(Nr * sizeof(complex double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(dummyc);
-
-
-    // x in complex
-    for (i=0; i < Nx; i++){
-        xinc[i] = 0.0 + 0.0*I;
-    }
-//WSCLEAN OPERATOR
-    wscleanParams.msFilename = "data/test/";
-    wscleanParams.nX = dimx;
-    wscleanParams.nY = dimy;
-    wscleanParams.pixelScaleX = uscale;
-    wscleanParams.pixelScaleY = uscale;
-    wscleanParams.flags = "-weight natural";
-    purify_interface_initialiseOperator(userdata, &wscleanParams, &wscleanFormat);
-    Ny = wscleanFormat.dataSize;
-    realloc(y, (Ny*sizeof(*y)));
-    realloc(y0, (Ny*sizeof(*y0)));
-    realloc(weights, (Ny*sizeof(*weights)));
-    purify_interface_readData(userdata, y, weights);
-    for (i=0;i<Ny;i++) y[i] *= w[i];
-//WSCLEAN OPERATOR
-
-
-
 
     // Initialize griding matrix.
 //    assert((start = clock())!=-1);
@@ -419,7 +415,7 @@ int main(int argc, char *argv[]) {
 //    purify_measurement_cftfwd((void*)y0, (void*)xoutc, datafwd);
     purify_interface_fwdOp(y0,xout,&userdata);
     alpha = -1.0 +0.0*I;
-    cblas_daxpy(Ny, -1.0, y, 1, y0, 1);
+    cblas_zaxpy(Ny, &alpha, y, 1, y0, 1);
     //purify_measurement_cftadj((void*)xinc, (void*)y0, dataadj);
     purify_interface_adjOp(xout,y0,&userdata);
 
@@ -507,13 +503,14 @@ int main(int argc, char *argv[]) {
     purify_image_free(&img);
     purify_image_free(&img_copy);
     free(deconv);
-    purify_visibility_free(&vis_test);
+    //purify_visibility_free(&vis_test);
     free(y);
     free(xinc);
     free(xout);
     free(w);
     free(y0);
     free(xoutc);
+    free(weights);
 
     sopt_sara_free(&param1);
     free(dict_types);
@@ -523,7 +520,7 @@ int main(int argc, char *argv[]) {
     fftw_destroy_plan(planfwd);
     fftw_destroy_plan(planadj);
     purify_sparsemat_freer(&gmat);
-    free(shifts);
+    //free(shifts);
 
     free(dummyr);
     free(dummyc);
