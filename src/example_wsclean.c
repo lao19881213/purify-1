@@ -44,23 +44,16 @@
 #include "wscleaninterface.h"
 #define VERBOSE 1
 int main(int argc, char *argv[]) {
-    int i, j;
-    int seedn=54;
-    double sigma;
-    double a;
-    double mse;
-    double snr;
-    double snr_out;
+    int i;
     double gamma=0.001;
-    double aux1, aux2, aux3, aux4;
+    double aux1, aux2;
     complex double alpha;
 
 
     purify_image img, img_copy;
-    purify_visibility_filetype filetype_vis;
+    //purify_visibility_filetype filetype_vis;
     purify_image_filetype filetype_img;
     char filename_vis[PURIFY_STRLEN];
-    char msFilename[PURIFY_STRLEN];
     complex double *y0;
     complex double *y;
     //double *xout;
@@ -77,19 +70,12 @@ int main(int argc, char *argv[]) {
     purify_sparsemat_row gmat;
     //purify_visibility vis_test;
     purify_measurement_cparam param_m1;
-    purify_measurement_cparam param_m2;
+    //purify_measurement_cparam param_m2;
     //WSCLEAN INTERFACE
-    //char *msFilename;
     void *userdata;
     purify_domain_info wscleanParams;
     purify_domain_data_format wscleanFormat;
     //WSCLEAN INTERFACE
-    complex double *fft_temp1;
-    complex double *fft_temp2;
-    void *datafwd[6];
-    void *dataadj[6];
-    fftw_plan planfwd;
-    fftw_plan planadj;
 
 
     //Structures for sparsity operator
@@ -103,13 +89,12 @@ int main(int argc, char *argv[]) {
 
     clock_t start, stop;
     double t = 0.0;
-    double start1, stop1;
     int dimy = 128;
     int dimx = 128;
 
 
     // Define parameters.
-    filetype_vis = PURIFY_VISIBILITY_FILETYPE_PROFILE_VIS_NODUMMY;
+    //filetype_vis = PURIFY_VISIBILITY_FILETYPE_PROFILE_VIS_NODUMMY;
     filetype_img = PURIFY_IMAGE_FILETYPE_FITS;
     strcpy(filename_vis, "data/images/Coverages/AMI_01.vis");
 
@@ -193,6 +178,10 @@ int main(int argc, char *argv[]) {
     for (i=0; i < Nx; i++){
         xinc[i] = 0.0 + 0.0*I;
     }
+    //img_copy.fov_y = img_copy.fov_x;
+    for (i=0; i < Nx; i++){
+        xoutc[i] = 0.0 + 0.0*I;
+    }
     
     // Define parameters for the convolutional gridding.
     param_m1.nmeas = Ny;
@@ -205,13 +194,13 @@ int main(int argc, char *argv[]) {
 
     // Define parameters for the convolutional gridding.
 //JDM: remove one of these sets of convolution gridding parameters?
-    param_m2.nmeas = Ny;
+    /*param_m2.nmeas = Ny;
     param_m2.ny1 = dimy;
     param_m2.nx1 = dimx;
     param_m2.ofy = 1;
     param_m2.ofx = 1;
     param_m2.ky = 24;
-    param_m2.kx = 24;
+    param_m2.kx = 24;*/
 
     // Initialize griding matrix.
 //    assert((start = clock())!=-1);
@@ -281,10 +270,6 @@ int main(int argc, char *argv[]) {
     img_copy.nx = param_m1.nx1;
     img_copy.ny = param_m1.ny1;
     img_copy.fov_x = img_copy.nx / (2.0 * umax);
-    img_copy.fov_y = img_copy.fov_x;
-//    for (i=0; i < Nx; i++){
-//        xoutc[i] = 0.0 + 0.0*I;
-//    }
 
 //
 //    printf("FoV = %f arcmin \n\n", img_copy.fov_x / PURIFY_PI * 180.0 * 60.0);
@@ -374,7 +359,7 @@ int main(int argc, char *argv[]) {
     param4.rel_obj = 0.0001;
     param4.epsilon = 0.01*aux1; //sqrt(Ny + 2*sqrt(Ny))*sigma/sqrt(aux4);
     param4.epsilon_tol = 0.01;
-    param4.real_data = 1;
+    param4.real_data = 0;
     param4.cg_max_iter = 100;
     param4.cg_tol = 0.000001;
 
@@ -515,10 +500,6 @@ int main(int argc, char *argv[]) {
     sopt_sara_free(&param1);
     free(dict_types);
 
-    free(fft_temp1);
-    free(fft_temp2);
-    fftw_destroy_plan(planfwd);
-    fftw_destroy_plan(planadj);
     purify_sparsemat_freer(&gmat);
     //free(shifts);
 
