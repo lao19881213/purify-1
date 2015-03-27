@@ -22,7 +22,7 @@
 #ifdef _OPENMP 
   #include <omp.h>
 #endif
-#include PURIFY_BLAS_H
+#include "cblas.h"
 #include "purify_visibility.h"
 #include "purify_sparsemat.h"
 #include "purify_image.h"
@@ -61,7 +61,6 @@ int main(int argc, char *argv[]) {
     purify_visibility_filetype filetype_vis;
     purify_image_filetype filetype_img;
     char filename_vis[PURIFY_STRLEN];
-    char msFilename[PURIFY_STRLEN];
     complex double *xinc;
     complex double *y0;
     complex double *y;

@@ -1,4 +1,4 @@
-set(EXAMPLE_SOURCES example_30dor.c example_ami.c example_m31.c example_realdata.c example_wsclean.c)
+set(EXAMPLE_SOURCES example_30dor.c example_ami.c example_m31.c example_realdata.c)
 set(PURIFY_SOURCES
   purify_measurement.c purify_error.c purify_ran.c purify_utils.c
   purify_image.c purify_sparsemat.c purify_visibility.c purify_interfaces.c
@@ -6,12 +6,17 @@ set(PURIFY_SOURCES
 set(TEST_SOURCE purify_test.c)
 set(ABOUT_SOURCE purify_about.c)
 
+set(WSCLEAN_SOURCE example_wsclean.c)
+set(WSCLEAN_INCPATH '/Users/svk/projects/packages/wsclean/wsclean/interface')
+set(WSCLEAN_LIBPATH '/Users/svk/projects/packages/wsclean/wsclean/interface')
+
 # Adds include directories
 include_directories(
   ${FFTW3_INCLUDE_DIR}
   ${CFitsIO_INCLUDE_DIR}
   ${TIFF_INCLUDE_DIR}
   ${Sopt_INCLUDE_DIRS}
+  ${WSCLEAN_INCPATH}
 )
 if(BLAS_INCLUDE_DIR)
   include_directories(${BLAS_INCLUDE_DIR})
@@ -49,6 +54,9 @@ set_target_properties( purify_about PROPERTIES
 )
 target_link_libraries(purify_about libpurify)
 
+# Add WSClean
+add_executable(purify_wsclean ${WSCLEAN_SOURCE})
+target_link_libraries(purify_wsclean libpurify libwsclean)
 
 # add test
 if(tests)
