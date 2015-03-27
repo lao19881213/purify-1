@@ -1,20 +1,21 @@
 //
 // Created by Vijay Kartik on 25/03/15.
 //
+#define WSCLEAN
 
+#include <complex.h>
 #include "purify_interfaces.h"
 #include "wscleaninterface.h"
 
-
-void purify_interface_initialiseOperator(void *userdata, const purify_domain_info *interfaceParams, purify_domain_data_format *interfaceFormat) {
+void purify_interface_initialiseOperator(void **userdata, const purify_domain_info *interfaceParams, purify_domain_data_format *interfaceFormat)
+{
 #ifdef WSCLEAN
-    wsclean_initialize(&userdata, interfaceParams, interfaceFormat);
-
+    wsclean_initialize(userdata, interfaceParams, interfaceFormat);
 #endif
 }
 
-
-void purify_interface_finaliseOperator(void *userdata) {
+void purify_interface_finaliseOperator(void *userdata)
+{
 #ifdef WSCLEAN
     wsclean_deinitialize(userdata);
 #endif

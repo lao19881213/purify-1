@@ -2,9 +2,9 @@
 #ifndef PURIFY_MEASUREMENT
 #define PURIFY_MEASUREMENT
 #include "purify_config.h"
-
+#include "purify_sparsemat.h"
 /*!  
- * Structure storing parameters for the interpolation operator.
+ * Structure storing parametrs for the interpolation operator.
  *
  */
 typedef struct {
@@ -24,27 +24,6 @@ typedef struct {
   int kx; 
   
 } purify_measurement_cparam;
-
-
-/*!
- * Structure storing parameters for the WSClean measurement operator.
- *
- */
-typedef struct {
-    /*! Measurement Set filename. */
-    const char *msFilename;
-    /*! Number of columns in the discrete image. */
-    unsigned int nx;
-    /*! Number of rows in the discrete image. */
-    unsigned int ny;
-    /*! Pixel scale in x. */
-    unsigned int pixelScalexX;
-    /*! Pixel scale in y. */
-    unsigned int pixelScaleY;
-    /*! String storing other flags that are read by WSClean. */
-    const char *wscleanFlags;
-
-} purify_domain_info;
 
 void purify_measurement_fft_real(void *out, 
 				 void *in, 
