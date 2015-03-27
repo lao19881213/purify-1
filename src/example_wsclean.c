@@ -13,17 +13,16 @@
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+#include <purify_measurement.h>
+#include <purify_interfaces.h>
+//#include <CoreGraphics/CoreGraphics.h>
+//#include <Foundation/Foundation.h>
+#include <sopt_utility.h>
 #include <time.h> 
 #ifdef _OPENMP 
   #include <omp.h>
 #endif
-#ifdef __APPLE__
-  #include <Accelerate/Accelerate.h>
-#elif __unix__
-  #include <cblas.h>
-#else
-#include <cblas.h>
-#endif
+#include PURIFY_BLAS_H
 #include "purify_visibility.h"
 #include "purify_sparsemat.h"
 #include "purify_image.h"
@@ -40,15 +39,12 @@
 #include "sopt_sara.h" 
 #include "sopt_ran.h" 
 #include "purify_utils.h"
-#include "../include/purify_measurement.h"
-
+#include "purify_measurement.h"
+#include "purify_interfaces.h"
+#include "wscleaninterface.h"
 #define VERBOSE 1
 
 int main(int argc, char *argv[]) {
-
-
-
-
     int i, j, Nx, Ny, Nr, Nb;
     int seedn=54;
     double sigma;
@@ -76,7 +72,7 @@ int main(int argc, char *argv[]) {
     complex double *dummyc;
 
 //JDM
-    double dx, umax, uscale;
+    double dx, umax, uscale; //dx in arc seconds
     //double *vis_noise_std;
 
     //parameters for the continuous Fourier Transform
@@ -85,7 +81,13 @@ int main(int argc, char *argv[]) {
     purify_visibility vis_test;
     purify_measurement_cparam param_m1;
     purify_measurement_cparam param_m2;
-    purify_WSClean_params wsCleanParams;
+    //WSCLEAN INTERFACE
+    //char *msFilename;
+    void *userdata;
+    double *weights = NULL;
+    purify_domain_info wscleanParams;
+    purify_domain_data_format wscleanFormat;
+    //WSCLEAN INTERFACE
     complex double *fft_temp1;
     complex double *fft_temp2;
     void *datafwd[6];
@@ -107,43 +109,37 @@ int main(int argc, char *argv[]) {
     clock_t start, stop;
     double t = 0.0;
     double start1, stop1;
-    int dimy, dimx;
-
-    // Image dimension of the zero padded image
-    // (dimensions should be power of 2).
-
-
-    dimx = 2048;
-    dimy = 2048;
+    int dimy = 128;
+    int dimx = 128;
 
 
     // Define parameters.
     filetype_vis = PURIFY_VISIBILITY_FILETYPE_PROFILE_VIS_NODUMMY;
     filetype_img = PURIFY_IMAGE_FILETYPE_FITS;
-    strcpy(filename_vis, "data/vsa/at166B.3C129.c0.vis");
+    strcpy(filename_vis, "data/images/Coverages/AMI_01.vis");
 
     // Read visibilities.
-    purify_visibility_readfile(&vis_test,
-            filename_vis,
-            filetype_vis);
+//    purify_visibility_readfile(&vis_test,
+//            filename_vis,
+//            filetype_vis);
 
     // Rescale the visibilities.
-    dx = 0.3; // arcsec
+//    dx = 0.3; // arcsec
     dx = dx / 60.0 / 60.0 / 180.0 * PURIFY_PI; // convert to radians
     umax = 1.0 / (2.0 * dx);
     uscale = 2.0*PURIFY_PI / umax;
-    for (i=0; i < vis_test.nmeas; i++) {
-        vis_test.u[i] = vis_test.u[i] * uscale;
-        vis_test.v[i] = vis_test.v[i] * uscale;
-    }
+//    for (i=0; i < vis_test.nmeas; i++) {
+//        vis_test.u[i] = vis_test.u[i] * uscale;
+//        vis_test.v[i] = vis_test.v[i] * uscale;
+//    }
 
 
 //JDM: remove
     // Input image.
     img.fov_x = 1.0 / 180.0 * PURIFY_PI;
     img.fov_y = 1.0 / 180.0 * PURIFY_PI;
-    img.nx = 2048;
-    img.ny = 2048;
+    img.nx = dimx;
+    img.ny = dimy;
 
 
 
@@ -202,72 +198,87 @@ int main(int argc, char *argv[]) {
     for (i=0; i < Nx; i++){
         xinc[i] = 0.0 + 0.0*I;
     }
+//WSCLEAN OPERATOR
+    wscleanParams.msFilename = "data/test/";
+    wscleanParams.nX = dimx;
+    wscleanParams.nY = dimy;
+    wscleanParams.pixelScaleX = uscale;
+    wscleanParams.pixelScaleY = uscale;
+    wscleanParams.flags = "-weight natural";
+    purify_interface_initialiseOperator(userdata, &wscleanParams, &wscleanFormat);
+    Ny = wscleanFormat.dataSize;
+    realloc(y, (Ny*sizeof(*y)));
+    realloc(y0, (Ny*sizeof(*y0)));
+    realloc(weights, (Ny*sizeof(*weights)));
+    purify_interface_readData(userdata, y, weights);
+    for (i=0;i<Ny;i++) y[i] *= w[i];
+//WSCLEAN OPERATOR
+
 
 
 
     // Initialize griding matrix.
-    assert((start = clock())!=-1);
-    purify_measurement_init_cft(&gmat, deconv, shifts, vis_test.u, vis_test.v, &param_m1);
-    stop = clock();
-    t = (double) (stop-start)/CLOCKS_PER_SEC;
-    printf("Time initalization: %f \n\n", t);
+//    assert((start = clock())!=-1);
+//    purify_measurement_init_cft(&gmat, deconv, shifts, vis_test.u, vis_test.v, &param_m1);
+//    stop = clock();
+//    t = (double) (stop-start)/CLOCKS_PER_SEC;
+//    printf("Time initalization: %f \n\n", t);
 
     // Memory allocation for the fft.
-    i = Nx * param_m1.ofy * param_m1.ofx;
-    fft_temp1 = (complex double*)malloc((i) * sizeof(complex double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(fft_temp1);
-    fft_temp2 = (complex double*)malloc((i) * sizeof(complex double));
-    PURIFY_ERROR_MEM_ALLOC_CHECK(fft_temp2);
-
-    // Plan FFTs.
-    planfwd = fftw_plan_dft_2d(param_m1.nx1*param_m1.ofx, param_m1.ny1*param_m1.ofy,
-            fft_temp1, fft_temp1,
-            FFTW_FORWARD, FFTW_MEASURE);
-
-    planadj = fftw_plan_dft_2d(param_m1.nx1*param_m1.ofx, param_m1.ny1*param_m1.ofy,
-            fft_temp2, fft_temp2,
-            FFTW_BACKWARD, FFTW_MEASURE);
-
-    // Set up data for forward FFT.
-    datafwd[0] = (void*)&param_m1;
-    datafwd[1] = (void*)deconv;
-    datafwd[2] = (void*)&gmat;
-    datafwd[3] = (void*)&planfwd;
-    datafwd[4] = (void*)fft_temp1;
-    datafwd[5] = (void*)shifts;
-
-    // Set up data for adjoint FFT.
-    dataadj[0] = (void*)&param_m2;
-    dataadj[1] = (void*)deconv;
-    dataadj[2] = (void*)&gmat;
-    dataadj[3] = (void*)&planadj;
-    dataadj[4] = (void*)fft_temp2;
-    dataadj[5] = (void*)shifts;
-
-
-    printf("FFT planing complete \n\n");
+//    i = Nx * param_m1.ofy * param_m1.ofx;
+//    fft_temp1 = (complex double*)malloc((i) * sizeof(complex double));
+//    PURIFY_ERROR_MEM_ALLOC_CHECK(fft_temp1);
+//    fft_temp2 = (complex double*)malloc((i) * sizeof(complex double));
+//    PURIFY_ERROR_MEM_ALLOC_CHECK(fft_temp2);
+//
+//    // Plan FFTs.
+//    planfwd = fftw_plan_dft_2d(param_m1.nx1*param_m1.ofx, param_m1.ny1*param_m1.ofy,
+//            fft_temp1, fft_temp1,
+//            FFTW_FORWARD, FFTW_MEASURE);
+//
+//    planadj = fftw_plan_dft_2d(param_m1.nx1*param_m1.ofx, param_m1.ny1*param_m1.ofy,
+//            fft_temp2, fft_temp2,
+//            FFTW_BACKWARD, FFTW_MEASURE);
+//
+//    // Set up data for forward FFT.
+//    datafwd[0] = (void*)&param_m1;
+//    datafwd[1] = (void*)deconv;
+//    datafwd[2] = (void*)&gmat;
+//    datafwd[3] = (void*)&planfwd;
+//    datafwd[4] = (void*)fft_temp1;
+//    datafwd[5] = (void*)shifts;
+//
+//    // Set up data for adjoint FFT.
+//    dataadj[0] = (void*)&param_m2;
+//    dataadj[1] = (void*)deconv;
+//    dataadj[2] = (void*)&gmat;
+//    dataadj[3] = (void*)&planadj;
+//    dataadj[4] = (void*)fft_temp2;
+//    dataadj[5] = (void*)shifts;
+//
+//
+//    printf("FFT planning complete \n\n");
 
     // Copy measured visibilities to y.
-    for (i=0; i < vis_test.nmeas; i++){
-        y[i] =  vis_test.y[i];
-    }
-
+//    for (i=0; i < vis_test.nmeas; i++){
+//        y[i] =  vis_test.y[i];
+//    }
 
 // Rescale the measurements and deconv operator to improve speed of CG solver.
 
 //Estimate operator norm using the power method.
-    aux4 = purify_measurement_pow_meth(&purify_measurement_cftfwd,
-            datafwd,
-            &purify_measurement_cftadj,
-            dataadj);
+//    aux4 = purify_measurement_pow_meth(&purify_measurement_cftfwd,
+//            datafwd,
+//            &purify_measurement_cftadj,
+//            dataadj);
 
-    printf("Operator norm = %f \n\n", aux4);
-    for (i=0; i < Ny; i++) {
-        y[i] = y[i] / sqrt(aux4);
-    }
-    for (i=0; i < Nx; i++) {
-        deconv[i] = deconv[i] / sqrt(aux4);
-    }
+//    printf("Operator norm = %f \n\n", aux4);
+//    for (i=0; i < Ny; i++) {
+//        y[i] = y[i] / sqrt(aux4);
+//    }
+//    for (i=0; i < Nx; i++) {
+//        deconv[i] = deconv[i] / sqrt(aux4);
+//    }
 
     // Output image.x
 
@@ -275,24 +286,24 @@ int main(int argc, char *argv[]) {
     img_copy.ny = param_m1.ny1;
     img_copy.fov_x = img_copy.nx / (2.0 * umax);
     img_copy.fov_y = img_copy.fov_x;
-    for (i=0; i < Nx; i++){
-        xoutc[i] = 0.0 + 0.0*I;
-    }
+//    for (i=0; i < Nx; i++){
+//        xoutc[i] = 0.0 + 0.0*I;
+//    }
 
-
-    printf("FoV = %f arcmin \n\n", img_copy.fov_x / PURIFY_PI * 180.0 * 60.0);
+//
+//    printf("FoV = %f arcmin \n\n", img_copy.fov_x / PURIFY_PI * 180.0 * 60.0);
 
 
     // Compute dirty image.
-    purify_measurement_cftadj((void*)xoutc, (void*)y, dataadj);
-
+//    purify_measurement_cftadj((void*)xoutc, (void*)y, dataadj);
     // Copy dirty image pixel data to img.
     img_copy.pix = (double*)malloc((Nx) * sizeof(double));
     PURIFY_ERROR_MEM_ALLOC_CHECK(img_copy.pix);
-    for (i=0; i < Nx; i++){
-        img_copy.pix[i] = creal(xoutc[i]);
-    }
-    purify_image_writefile(&img_copy, "data/vsa/dirty_image.fits", filetype_img);
+    purify_interface_adjOp(img_copy.pix, y, &userdata);
+//    for (i=0; i < Nx; i++){
+//        img_copy.pix[i] = creal(xoutc[i]);
+//    }
+    purify_image_writefile(&img_copy, "data/test/dirty_image.fits", filetype_img);
 
 
     //L2 norm of the data
@@ -348,12 +359,11 @@ int main(int argc, char *argv[]) {
 
     //Initial solution and weights
     for (i=0; i < Nx; i++) {
-        xoutc[i] = 0.0 + 0.0*I;
+        xout[i] = 0.0;
     }
     for (i=0; i < Nr; i++){
         w[i] = 1.0;
     }
-
 
     printf("**********************\n");
     printf("BPSA reconstruction\n");
@@ -363,31 +373,26 @@ int main(int argc, char *argv[]) {
 
     //Structure for the L1 solver
     param4.verbose = 2;
-    param4.max_iter = 5;
+    param4.max_iter = 10;
     param4.gamma = gamma*aux2;//*sqrt(aux4);
     param4.rel_obj = 0.0001;
     param4.epsilon = 0.01*aux1; //sqrt(Ny + 2*sqrt(Ny))*sigma/sqrt(aux4);
     param4.epsilon_tol = 0.01;
-    param4.real_data = 0;
+    param4.real_data = 1;
     param4.cg_max_iter = 100;
     param4.cg_tol = 0.000001;
 
-
-    //Initial solution
-    for (i=0; i < Nx; i++) {
-        xoutc[i] = 0.0 + 0.0*I;
-    }
 
 #ifdef _OPENMP
     start1 = omp_get_wtime();
   #else
     assert((start = clock())!=-1);
 #endif
-    sopt_l1_sdmm((void*)xoutc, Nx,
-            &purify_measurement_cftfwd,
-            datafwd,
-            &purify_measurement_cftadj,
-            dataadj,
+    sopt_l1_sdmm((void*)xout, Nx,
+            &purify_interface_fwdOp,
+            &userdata,
+            &purify_interface_adjOp,
+            &userdata,
             &sopt_sara_synthesisop,
             datas,
             &sopt_sara_analysisop,
@@ -406,26 +411,21 @@ int main(int argc, char *argv[]) {
     printf("Time BPSA: %f \n\n", t);
 
 
-
-    for (i=0; i < Nx; i++){
-        img_copy.pix[i] = creal(xoutc[i]);
-    }
-
-    purify_image_writefile(&img_copy, "data/vsa/bpsa_rec.fits", filetype_img);
-
+    //wsclean_write(userdata, xout);
+    for (i=0; i < Nx; i++) img_copy.pix[i] = xout[i];
+    purify_image_writefile(&img_copy, "data/test/rbpsa_rec.fits", filetype_img);
 
     //Residual image
-    purify_measurement_cftfwd((void*)y0, (void*)xoutc, datafwd);
+//    purify_measurement_cftfwd((void*)y0, (void*)xoutc, datafwd);
+    purify_interface_fwdOp(y0,xout,&userdata);
     alpha = -1.0 +0.0*I;
-    cblas_zaxpy(Ny, (void*)&alpha, y, 1, y0, 1);
-    purify_measurement_cftadj((void*)xinc, (void*)y0, dataadj);
+    cblas_daxpy(Ny, -1.0, y, 1, y0, 1);
+    //purify_measurement_cftadj((void*)xinc, (void*)y0, dataadj);
+    purify_interface_adjOp(xout,y0,&userdata);
 
-    for (i=0; i < Nx; i++){
-        img_copy.pix[i] = creal(xinc[i]);
-    }
-
-    purify_image_writefile(&img_copy, "data/vsa/residual.fits", filetype_img);
-
+//    wsclean_write(userdata,xout);
+    for (i=0; i < Nx; i++) img_copy.pix[i] = xout[i];
+    purify_image_writefile(&img_copy, "data/test/residual.fits", filetype_img);
 
     /*
 
