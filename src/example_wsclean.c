@@ -15,8 +15,8 @@
 #include <assert.h>
 #include <purify_measurement.h>
 #include <purify_interfaces.h>
-#include <CoreGraphics/CoreGraphics.h>
-#include <Foundation/Foundation.h>
+//#include <CoreGraphics/CoreGraphics.h>
+//#include <Foundation/Foundation.h>
 #include <sopt_utility.h>
 #include <time.h> 
 #ifdef _OPENMP 
@@ -45,10 +45,6 @@
 #define VERBOSE 1
 
 int main(int argc, char *argv[]) {
-
-
-
-
     int i, j, Nx, Ny, Nr, Nb;
     int seedn=54;
     double sigma;
@@ -86,11 +82,11 @@ int main(int argc, char *argv[]) {
     purify_measurement_cparam param_m1;
     purify_measurement_cparam param_m2;
     //WSCLEAN INTERFACE
-    char *msFilename;
+    //char *msFilename;
     void *userdata;
     double *weights = NULL;
-    purify_interface_params wscleanParams;
-    purify_interface_format wscleanFormat;
+    purify_domain_info wscleanParams;
+    purify_domain_data_format wscleanFormat;
     //WSCLEAN INTERFACE
     complex double *fft_temp1;
     complex double *fft_temp2;
@@ -209,11 +205,11 @@ int main(int argc, char *argv[]) {
     wscleanParams.pixelScaleX = uscale;
     wscleanParams.pixelScaleY = uscale;
     wscleanParams.flags = "-weight natural";
-    purify_interface_initialiseOperator(&userdata, &wscleanParams, &wscleanFormat);
+    purify_interface_initialiseOperator(userdata, &wscleanParams, &wscleanFormat);
     Ny = wscleanFormat.dataSize;
     realloc(y, (Ny*sizeof(*y)));
     realloc(y0, (Ny*sizeof(*y0)));
-    realloc(weights, (Ny*sizeof(*weights));
+    realloc(weights, (Ny*sizeof(*weights)));
     purify_interface_readData(userdata, y, weights);
     for (i=0;i<Ny;i++) y[i] *= w[i];
 //WSCLEAN OPERATOR
