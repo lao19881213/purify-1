@@ -918,8 +918,6 @@ double purify_measurement_pow_meth(void (*A)(void *out, void *in, void **data),
     
     cblas_zdscal(nx, 1.0/norm, (void*)x, 1);
     
-    norm = 1.0;
-    
     //main loop
     while (iter < 200){
       A((void*)y, (void*)x, A_data);
@@ -950,8 +948,6 @@ double purify_measurement_pow_meth(void (*A)(void *out, void *in, void **data),
     norm = norm/ny;
     
     cblas_zdscal(ny, 1.0/norm, (void*)x, 1);
-    
-    norm = 1.0;
     
     //main loop
     while (iter < 200){
