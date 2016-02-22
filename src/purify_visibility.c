@@ -548,6 +548,9 @@ void purify_visibility_vis2mask(purify_sparsemat *mask,
  * 
  * \authors <a href="http://www.jasonmcewen.org">Jason McEwen</a>
  */
+
+ //edited to delete dummy in case PURIFY_VISIBILITY_FILETYPE_PROFILE_WIS
+    // authorLaura Wolz
 int purify_visibility_readfile(purify_visibility *vis, 
 			       const char *filename, 
 			       purify_visibility_filetype filetype) {
@@ -694,25 +697,24 @@ int purify_visibility_readfile(purify_visibility *vis,
       itok = 0;
       while (tok != NULL) {
 	switch (itok) {
+	//edited to delete dummy
+    //Laura Wolz
 	case 0:
-	  // dummy
-	  break;
-	case 1:
 	  vis->u[i] = atof(tok);
 	  break;
-	case 2:
+	case 1:
 	  vis->v[i] = atof(tok);
 	  break;
-	case 3:
+	case 2:
 	  vis->w[i] = atof(tok);
 	  break;
-	case 4:
+	case 3:
 	  vis->y[i] = atof(tok);
 	  break;
-	case 5:
+	case 4:
 	  vis->y[i] += I * atof(tok);
 	  break;
-	case 6:
+	case 5:
 	  vis->noise_std[i] = (1 + I) * atof(tok) / PURIFY_SQRT2;
 	  break;
 	default:

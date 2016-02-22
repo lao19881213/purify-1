@@ -754,17 +754,20 @@ void purify_measurement_cftfwd(void *out, void *in, void **data){
   temp = (complex double*)data[4];
   shifts = (complex double*)data[5];
 
+
   xin = (complex double*)in;
   yout = (complex double*)out;
 
   nx2 = param->ofx*param->nx1;
   ny2 = param->ofy*param->ny1;
   
+
   alpha = 0.0 + 0.0*I;
   //Zero padding and decovoluntion. 
   //Center part of the image corresponds to the original image.
   for (i=0; i < nx2*ny2; i++){
     *(temp + i) = alpha;
+
   }
 
   //Scaling
@@ -776,11 +779,15 @@ void purify_measurement_cftfwd(void *out, void *in, void **data){
   xo = floor(nx2/2) - floor(param->nx1/2);
   yo = floor(ny2/2) - floor(param->ny1/2);
 
+  complex double dummy;
+
   for (j=0; j < param->nx1; j++){
     st1 = j*param->ny1;
     st2 = (j + xo)*ny2;
     for (i=0; i < param->ny1; i++){
-      *(temp + st2 + i + yo) = *(xin + st1 + i)**(deconv + st1 + i)*scale;
+      *(temp + st2 + i + yo) = *(xin + st1 + i)**(deconv + st1 + i)*scale;  
+      dummy=   *(xin + st1 + i)*scale; 
+      
     }
   }
 
@@ -789,6 +796,7 @@ void purify_measurement_cftfwd(void *out, void *in, void **data){
 
   //Multiplication by the sparse matrix storing the interpolation kernel
   //and the shifts
+  
   purify_sparsemat_fwd_complexrsc(yout, temp, mat, shifts);
 
 }

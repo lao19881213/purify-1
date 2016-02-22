@@ -5,8 +5,6 @@
 
 void purify_utils_fftshift_1d(double *out, double *in, int n);
 
-void purify_utils_fftshift_2d(complex double *out, complex double *in, int nx, int ny);
-
 void purify_utils_ifftshift_1d(double *out, double *in, int n);
 
 double purify_utils_maxarray(double *a, int num_elements);

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <complex.h>  // Must be before fftw3.h
 #include "purify_error.h"
 #include "purify_types.h"
 
@@ -37,6 +38,53 @@ void purify_utils_fftshift_1d(double *out, double *in, int n) {
 
 }
 
+
+/*!
+ * fftshift of 2D array. Swaps the quarter of the two-dim data 
+ * 
+ * \param[out] out shifted output array.
+ * \param[in] in input array.
+ * \param[in] nx number of elements in the array.
+ * \param[in] ny number of elements in the array.
+
+ * \authors Laura Wolz
+ */
+ ////NEEDS TESTING!
+ //ONLY WORK FOR EVEN PIXELISATION FOR NOW
+void purify_utils_fftshift_2d(complex double *out,complex double *in, int nx, int ny) {
+  
+  int NFx, NFy;
+  int NCx, NCy;
+  int ii, jj;
+
+  NFx=(int)floor(nx/2.0);
+  NCx=(int)ceil(nx/2.0);
+  NFy=(int)floor(ny/2.0);
+  NCy=(int)ceil(ny/2.0);
+
+  //swap two quarters
+  for (int i=0; i<NFx; i++){
+    for(int j=0; j<NFy; j++){
+      ii=i+NCx;
+      jj=j+NCy; 
+      out[i*ny + j]=in[ii*ny + jj];
+      out[ii*ny + jj]=in[i*ny + j];
+    }
+  }
+  
+  for (int i=NFx; i<nx; i++){
+    for(int j=0; j<NFy; j++){
+      ii=i-NFx;
+      jj=j+NCy; 
+      out[i*ny + j]=in[ii*ny + jj];
+      out[ii*ny + jj]=in[i*ny + j];
+
+    }
+  }
+  
+  
+
+}
 
 /*!
  * inverse fftshift of 1D array .
