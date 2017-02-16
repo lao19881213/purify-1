@@ -33,8 +33,16 @@ int main(int, char **) {
   t_int width = 512;
   t_int height = 512;
   uv_data = utilities::uv_symmetry(uv_data);
-  MeasurementOperator measurements(uv_data, 4, 4, "kb_interp", width, height, 20, over_sample,
-                                   cellsize, cellsize, "whiten");
+    auto const measurements = MeasurementOperator(uv_data)
+                        .Ju(4)
+                        .Jv(4)
+                        .kernel_name("kb_interp")
+                        .imsizex(width)
+                        .imsizey(height)
+                        .norm_iterations(20)
+                        .oversample_factor(over_sample)
+                        .weighting_type("witen");
+
   // putting measurement operator in a form that sopt can use
   auto measurements_transform = linear_transform(measurements, uv_data.vis.size());
 

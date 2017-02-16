@@ -40,7 +40,15 @@ int main(int nargs, char const **args) {
 
   PURIFY_HIGH_LOG("Number of measurements: {}", uv_data.u.size());
   // uv_data = utilities::uv_symmetry(uv_data); //reflect uv measurements
-  MeasurementOperator measurements(uv_data, J, J, kernel, M31.cols(), M31.rows(), 20, over_sample);
+  auto const measurements = MeasurementOperator(uv_data)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(M31.cols())
+    .imsizey(M31.rows())
+    .norm_iterations(20)
+    .oversample_factor(over_sample);
+
   uv_data.vis = measurements.degrid(M31);
   utilities::write_visibility(uv_data, vis_file);
 }

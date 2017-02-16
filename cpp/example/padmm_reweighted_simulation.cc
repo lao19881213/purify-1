@@ -53,13 +53,24 @@ int main(int nargs, char const **args) {
   auto uv_data = utilities::random_sample_density(number_of_vis, 0, sigma_m);
   uv_data.units = "radians";
   PURIFY_MEDIUM_LOG("Number of measurements: {}", uv_data.u.size());
-  MeasurementOperator simulate_measurements(uv_data, 8, 8, "kb", sky_model.cols(), sky_model.rows(),
-                                            200,
-                                            2); // Generating simulated high quality visibilities
+
+  auto const simulate_measurements
+      = MeasurementOperator(uv_data)
+            .Ju(8)
+            .Jv(8)
+            .imsizex(sky_model.cols())
+            .imsizey(sky_model.rows())
+            .norm_iterations(200); // Generating simulated high quality visibilities
   uv_data.vis = simulate_measurements.degrid(sky_model);
 
-  MeasurementOperator measurements(uv_data, J, J, kernel, sky_model.cols(), sky_model.rows(), 200,
-                                   over_sample);
+  auto const measurements = MeasurementOperator(uv_data)
+                                .Ju(J)
+                                .Jv(J)
+                                .kernel_name(kernel)
+                                .imsizex(sky_model.cols())
+                                .imsizey(sky_model.rows())
+                                .norm_iterations(200)
+                                .oversample_factor(over_sample);
 
   // putting measurement operator in a form that sopt can use
   auto measurements_transform = linear_transform(measurements, uv_data.vis.size());

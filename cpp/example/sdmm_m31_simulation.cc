@@ -10,10 +10,10 @@
 #include <sopt/wavelets/sara.h>
 #include "purify/MeasurementOperator.h"
 #include "purify/directories.h"
+#include "purify/logging.h"
 #include "purify/pfitsio.h"
 #include "purify/types.h"
 #include "purify/utilities.h"
-#include "purify/logging.h"
 
 int main(int nargs, char const **args) {
   if(nargs != 6) {
@@ -47,12 +47,24 @@ int main(int nargs, char const **args) {
   auto uv_data = utilities::random_sample_density(number_of_vis, 0, sigma_m);
   uv_data.units = "radians";
   std::cout << "Number of measurements: " << uv_data.u.size() << '\n';
-  MeasurementOperator simulate_measurements(uv_data, 4, 4, "kb", sky_model.cols(), sky_model.rows(),
-                                            20, 5); // Generating simulated high quality visibilites
+  auto const simulate_measurements
+      = MeasurementOperator(uv_data)
+            .Ju(4)
+            .Jv(4)
+            .kernel_name("kb")
+            .imsizex(sky_model.cols())
+            .imsizey(sky_model.rows())
+            .norm_iterations(20)
+            .oversample_factor(5); // Generating simulated high quality visibilites
   uv_data.vis = simulate_measurements.degrid(sky_model);
+  auto const measurements = MeasurementOperator(uv_data)
+                                .Ju(J)
+                                .Jv(J)
+                                .kernel_name(kernel)
+                                .imsizex(sky_model.cols())
+                                .imsizey(sky_model.rows())
+                                .oversample_factor(over_sample);
 
-  MeasurementOperator measurements(uv_data, J, J, kernel, sky_model.cols(), sky_model.rows(),
-                                   over_sample);
   // putting measurement operator in a form that sopt can use
   auto measurements_transform = linear_transform(measurements, uv_data.vis.size());
 

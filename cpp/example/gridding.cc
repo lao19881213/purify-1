@@ -17,9 +17,15 @@ int main(int nargs, char const **args) {
   auto const width = 1024;
   auto const height = 1024;
 
-  auto const kernel = "kb";
-  MeasurementOperator op(uv_vis, J, J, kernel, width, height, 20, over_sample, cellsize, cellsize,
-                         "none", 0); // Generating gridding matrix
+  auto const op = MeasurementOperator(uv_vis)
+                      .Ju(J)
+                      .Jv(J)
+                      .imsizex(width)
+                      .imsizey(height)
+                      .norm_iterations(20)
+                      .oversample_factor(over_sample)
+                      .cell_x(cellsize)
+                      .cell_y(cellsize);
 
   Image<t_real> kb_img = op.grid(uv_vis.vis).real();
   pfitsio::write2d(kb_img.real(), "grid_image.fits");

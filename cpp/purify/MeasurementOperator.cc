@@ -10,6 +10,8 @@ namespace purify {
        eigen_image:: input image to be degridded
        st:: gridding parameters
        */
+
+    if (not is_init) init_operator(uv_vis_input());
     Matrix<t_complex> padded_image = Matrix<t_complex>::Zero(floor(imsizey_ * oversample_factor_),
         floor(imsizex_ * oversample_factor_));
     Matrix<t_complex> ft_vector(ftsizev_, ftsizeu_);
@@ -41,6 +43,7 @@ namespace purify {
        st:: gridding parameters
        */
     // Matrix<t_complex> ft_vector = G.adjoint() * (visibilities.array() * W).matrix()/norm;
+    if (not is_init) init_operator(uv_vis_input());
     Matrix<t_complex> ft_vector
       = utilities::sparse_multiply_matrix(G.adjoint(), (visibilities.array() * W.conjugate()).matrix()) / norm;
     ft_vector.resize(ftsizev_, ftsizeu_); // using conservativeResize does not work, it garbles the
@@ -203,51 +206,8 @@ namespace purify {
     }
     return old_value;
   }
-  MeasurementOperator::MeasurementOperator(
-      const utilities::vis_params &uv_vis_input, const t_int &Ju, const t_int &Jv,
-      const std::string &kernel_name, const t_int &imsizex, const t_int &imsizey,
-      const t_int &norm_iterations, const t_real &oversample_factor, const t_real &cell_x,
-      const t_real &cell_y, const std::string &weighting_type, const t_real &R, bool use_w_term,
-      const t_real &energy_fraction, const std::string &primary_beam, bool fft_grid_correction) {
-    /*
-       Generates operators needed for gridding and degridding.
-
-       uv_vis_input:: coordinates, weights, and visibilities.
-       Ju, Jv:: support size in cells. e.g. Ju = 4, Jv =4.
-       kernel_name:: Name of kernel. e.g. "kb"
-       imsizey, imsizex:: size of image
-       norm_iterations:: number of max iterations in power method
-       oversample_factor:: ratio of fourier grid size to image size
-       cell_x, cell_y:: size of a pixel in arcseconds.
-       weighting_type:: weighting schemes such as whiten, natural, uniform, robust.
-       R:: robustness parameter, e.g. 0.
-       use_w_term:: weither to include wterm.
-       energy_fraction:: how much energy to keep for chirp matrix in w-projection
-       primary_beam:: which primary beam model to use, e.g. "atca"
-       fft_grid_correction:: Calculate grid correction using FFT or analytically
-
-
-*/
-    *this = MeasurementOperator::Ju(Ju)
-      .Jv(Jv)
-      .kernel_name(kernel_name)
-      .imsizex(imsizex)
-      .imsizey(imsizey)
-      .norm_iterations(norm_iterations)
-      .oversample_factor(oversample_factor)
-      .cell_x(cell_x)
-      .cell_y(cell_y)
-      .weighting_type(weighting_type)
-      .R(R)
-      .use_w_term(use_w_term)
-      .energy_fraction(energy_fraction)
-      .primary_beam(primary_beam)
-      .fft_grid_correction(fft_grid_correction);
-    MeasurementOperator::init_operator(uv_vis_input);
-  }
-  MeasurementOperator::MeasurementOperator() {
-    // Most basic constructor
-  }
+  
+  MeasurementOperator::MeasurementOperator(const utilities::vis_params &uv_vis_input) : uv_vis_input_(uv_vis_input){}
 
   void MeasurementOperator::init_operator(const utilities::vis_params &uv_vis_input) {
     // construction of linear operators in measurement operator, GFZSA
@@ -324,6 +284,7 @@ namespace purify {
       norm = std::sqrt(MeasurementOperator::power_method(norm_iterations_));
       PURIFY_LOW_LOG("Found a norm of eta = {}", norm);
       PURIFY_HIGH_LOG("Gridding Operator Constructed: WGFSA");
+      is_init = true;
       return;
     }
 
@@ -442,6 +403,7 @@ namespace purify {
     norm *= std::sqrt(MeasurementOperator::power_method(norm_iterations_));
     PURIFY_DEBUG("Found a norm of eta = {}", norm);
     PURIFY_HIGH_LOG("Gridding Operator Constructed: WGFSA");
+    is_init = true;
   }
 
   sopt::LinearTransform<sopt::Vector<sopt::t_complex>>

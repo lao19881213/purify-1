@@ -5,7 +5,6 @@
 #include <sopt/imaging_padmm.h>
 #include <sopt/positive_quadrant.h>
 #include <sopt/relative_variation.h>
-#include <sopt/relative_variation.h>
 #include <sopt/reweighted.h>
 #include <sopt/utilities.h>
 #include <sopt/wavelets.h>
@@ -47,7 +46,14 @@ int main(int, char **) {
   utilities::write_visibility(uv_data, output_vis_file);
   SOPT_NOTICE("Number of measurements / number of pixels: {}", uv_data.u.size() * 1. / M31.size());
   // uv_data = utilities::uv_symmetry(uv_data); //reflect uv measurements
-  MeasurementOperator measurements(uv_data, 4, 4, "kb", M31.cols(), M31.rows(), 20, over_sample);
+  auto measurements = MeasurementOperator(uv_data)
+                          .Ju(4)
+                          .Jv(4)
+                          .imsizex(M31.cols())
+                          .imsizey(M31.rows())
+                          .norm_iterations(20)
+                          .oversample_factor(over_sample);
+
   auto measurements_transform = linear_transform(measurements, uv_data.vis.size());
 
   sopt::wavelets::SARA const sara{

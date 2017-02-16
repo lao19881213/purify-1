@@ -26,7 +26,14 @@ void padmm(const std::string & name, const Image<t_complex> & M31, const std::st
 
 
   t_real const over_sample = 2;
-  MeasurementOperator measurements(uv_data, J, J, kernel, M31.cols(), M31.rows(), 100, over_sample);
+  auto measurements = MeasurementOperator(uv_data)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(M31.cols())
+    .imsizey(M31.rows())
+    .norm_iterations(100)
+    .oversample_factor(over_sample);
   auto measurements_transform = linear_transform(measurements, uv_data.vis.size());
 
   sopt::wavelets::SARA const sara{
@@ -101,7 +108,14 @@ int main(int, char **) {
   std::cout << "Number of measurements / number of pixels: " << uv_data.u.size() * 1. / number_of_pxiels
             << '\n';
   // uv_data = utilities::uv_symmetry(uv_data); //reflect uv measurements
-  MeasurementOperator sky_measurements(uv_data, 8, 8, "kb", M31.cols(), M31.rows(), 100, 2);
+auto sky_measurements = MeasurementOperator(uv_data)
+  .Ju(8)
+  .Jv(8)
+  .imsizex(M31.cols())
+  .imsizey(M31.rows())
+  .norm_iterations(100)
+  .oversample_factor(2);
+
   uv_data.vis = sky_measurements.degrid(M31);
   Vector<t_complex> const y0 = uv_data.vis;
   // working out value of signal given SNR of 30

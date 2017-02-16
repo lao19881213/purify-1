@@ -53,8 +53,15 @@ TEST_CASE("Serial vs. Parallel PADMM with random coverage.") {
   uv_data.units = "radians";
   PURIFY_MEDIUM_LOG("Number of measurements: {}", uv_data.u.size());
 
-  MeasurementOperator sky_measurements(uv_data, 4, 4, "kb", sky_model.cols(), sky_model.rows(), 100,
-                                       over_sample);
+  auto sky_measurements = MeasurementOperator(uv_data)
+                                    .Ju(4)
+                                    .Jv(4)
+                                    .kernel_name("kb")
+                                    .imsizex(sky_model.cols())
+                                    .imsizey(sky_model.rows())
+                                    .norm_iterations(100)
+                                    .oversample_factor(over_sample);
+  
   sky_measurements.norm = world.broadcast(sky_measurements.norm);
   // working out value of sigma given SNR of 30
   auto const sigma = world.broadcast(utilities::SNR_to_standard_deviation(uv_data.vis, ISNR));
@@ -72,9 +79,15 @@ TEST_CASE("Serial vs. Parallel PADMM with random coverage.") {
     uv_data = utilities::regroup_and_scatter(uv_data, order, split_comm);
   } else if(split_comm.size() > 1)
     uv_data = utilities::scatter_visibilities(split_comm);
+  auto measurements = MeasurementOperator(uv_data)
+                                    .Ju(J)
+                                    .Jv(J)
+                                    .kernel_name(kernel)
+                                    .imsizex(sky_model.cols())
+                                    .imsizey(sky_model.rows())
+                                    .norm_iterations(100)
+                                    .oversample_factor(over_sample);
 
-  MeasurementOperator measurements(uv_data, J, J, kernel, sky_model.cols(), sky_model.rows(), 100,
-                                   over_sample);
   measurements.norm = world.broadcast(measurements.norm);
   auto measurements_transform = linear_transform(measurements, uv_data.vis.size());
 

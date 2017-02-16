@@ -31,8 +31,17 @@ TEST_CASE("Measurement Operator [Kaiser Bessel Linear Interpolation]", "[KB_Inte
       uv_vis); // Enforce condjugate symmetry by reflecting measurements in uv coordinates
 
   kernel = "kb_interp";
-  MeasurementOperator op(uv_vis, J, J, kernel, width, height, 5, over_sample, cellsize,
-                         cellsize); // Generating gridding matrix
+  auto const op = MeasurementOperator(uv_vis)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(width)
+    .imsizey(height)
+    .norm_iterations(5)
+    .oversample_factor(over_sample)
+    .cell_x(cellsize)
+    .cell_y(cellsize);
+
 
   Vector<t_complex> point_source = uv_vis.vis * 0;
   point_source.setOnes(); // Creating model visibilities for point source
@@ -71,8 +80,17 @@ TEST_CASE("Measurement Operator [Kaiser Bessel]", "[KB_Non-Interp]") {
       uv_vis); // Enforce condjugate symmetry by reflecting measurements in uv coordinates
 
   kernel = "kb";
-  MeasurementOperator op(uv_vis, J, J, kernel, width, height, 5, over_sample, cellsize,
-                         cellsize); // Generating gridding matrix
+
+  auto const op = MeasurementOperator(uv_vis)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(width)
+    .imsizey(height)
+    .norm_iterations(5)
+    .oversample_factor(over_sample)
+    .cell_x(cellsize)
+    .cell_y(cellsize);
 
   Vector<t_complex> point_source = uv_vis.vis * 0;
   point_source.setOnes(); // Creating model visibilities for point source
@@ -3072,8 +3090,18 @@ TEST_CASE("Measurement Operator [Gridding]", "[Gridding]") {
 
   SECTION("Kaiser Bessel Gridding") {
     kernel = "kb";
-    MeasurementOperator op(uv_vis, J, J, kernel, 1024, 1024, 5, over_sample, cellsize,
-                           cellsize); // Generating gridding matrix
+
+  auto const op = MeasurementOperator(uv_vis)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(1024)
+    .imsizey(1024)
+    .norm_iterations(5)
+    .oversample_factor(over_sample)
+    .cell_x(cellsize)
+    .cell_y(cellsize);
+
 
     psf = op.grid(point_source);
     max = psf.real().maxCoeff();
@@ -3103,8 +3131,18 @@ TEST_CASE("Measurement Operator [Gridding]", "[Gridding]") {
   }
   SECTION("Prolate Spheroidal Wave Functon Gridding") {
     kernel = "pswf";
-    MeasurementOperator op(uv_vis, J, J, kernel, 1024, 1024, 5, over_sample, cellsize,
-                           cellsize); // Generating gridding matrix
+
+   auto const op = MeasurementOperator(uv_vis)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(1024)
+    .imsizey(1024)
+    .norm_iterations(5)
+    .oversample_factor(over_sample)
+    .cell_x(cellsize)
+    .cell_y(cellsize);
+ 
     Image<t_real> pswf_img = op.grid(uv_vis.vis).real();
     max = pswf_img.maxCoeff();
     pswf_img = pswf_img / max;
@@ -3134,8 +3172,17 @@ TEST_CASE("Measurement Operator [Gridding]", "[Gridding]") {
   }
   SECTION("Gaussian Gridding") {
     kernel = "gauss";
-    MeasurementOperator op(uv_vis, J, J, kernel, 1024, 1024, 5, over_sample, cellsize,
-                           cellsize); // Generating gridding matrix
+   auto const op = MeasurementOperator(uv_vis)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(1024)
+    .imsizey(1024)
+    .norm_iterations(5)
+    .oversample_factor(over_sample)
+    .cell_x(cellsize)
+    .cell_y(cellsize);
+
     Image<t_real> gauss_img = op.grid(uv_vis.vis).real();
     max = gauss_img.maxCoeff();
     gauss_img = gauss_img / max;
@@ -3196,8 +3243,18 @@ TEST_CASE("Measurement Operator [Degridding]", "[Degridding]") {
     uv_vis = utilities::uv_scale(uv_vis, img.cols() * over_sample, img.rows() * over_sample);
     uv_vis.v = -uv_vis.v;
     uv_vis.units = "pixels";
-    MeasurementOperator op(uv_vis, J, J, kernel, img.cols(), img.rows(), 5, over_sample, cellsize,
-                           cellsize); // Calculates gridding matrix
+
+   auto const op = MeasurementOperator(uv_vis)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(img.cols())
+    .imsizey(img.rows())
+    .norm_iterations(5)
+    .oversample_factor(over_sample)
+    .cell_x(cellsize)
+    .cell_y(cellsize);
+
 
     point = Image<t_complex>::Zero(img.cols(), img.rows());
     point(floor(img.cols() / 2) - 1, floor(img.rows() / 2) - 1)
@@ -3250,8 +3307,16 @@ TEST_CASE("Measurement Operator [Degridding]", "[Degridding]") {
     uv_vis = utilities::uv_scale(uv_vis, img.cols() * over_sample, img.rows() * over_sample);
     uv_vis.v = -uv_vis.v;
     uv_vis.units = "pixels";
-    MeasurementOperator op(uv_vis, J, J, kernel, img.cols(), img.rows(), 5, over_sample, cellsize,
-                           cellsize); // Calculates gridding matrix
+   auto const op = MeasurementOperator(uv_vis)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(img.cols())
+    .imsizey(img.rows())
+    .norm_iterations(5)
+    .oversample_factor(over_sample)
+    .cell_x(cellsize)
+    .cell_y(cellsize);// Calculates gridding matrix
 
     point = Image<t_complex>::Zero(img.cols(), img.rows());
     point(floor(img.cols() / 2) - 1, floor(img.rows() / 2) - 1)
@@ -3304,8 +3369,16 @@ TEST_CASE("Measurement Operator [Degridding]", "[Degridding]") {
     uv_vis = utilities::uv_scale(uv_vis, img.cols() * over_sample, img.rows() * over_sample);
     uv_vis.v = -uv_vis.v;
     uv_vis.units = "pixels";
-    MeasurementOperator op(uv_vis, J, J, kernel, img.cols(), img.rows(), 5, over_sample, cellsize,
-                           cellsize); // Calculates gridding matrix
+   auto const op = MeasurementOperator(uv_vis)
+    .Ju(J)
+    .Jv(J)
+    .kernel_name(kernel)
+    .imsizex(img.cols())
+    .imsizey(img.rows())
+    .norm_iterations(5)
+    .oversample_factor(over_sample)
+    .cell_x(cellsize)
+    .cell_y(cellsize);// Calculates gridding matrix
 
     point = Image<t_complex>::Zero(img.cols(), img.rows());
     point(floor(img.cols() / 2) - 1, floor(img.rows() / 2) - 1)

@@ -44,8 +44,14 @@ int main(int nargs, char const **args) {
   for(t_int i = 0; i < number_of_tests; ++i) {
     auto uv_data = utilities::random_sample_density(number_of_vis, 0, sigma_m);
     uv_data.units = "radians";
-    MeasurementOperator op(uv_data, J, J, kernel, width, height, 20,
-                           over_sample); // Generating gridding matrix
+    auto const op = MeasurementOperator(uv_data)
+                        .Ju(J)
+                        .Jv(J)
+                        .kernel_name(kernel)
+                        .imsizex(width)
+                        .imsizey(height)
+                        .norm_iterations(20)
+                        .oversample_factor(over_sample);
 
     uv_data.vis
         = Vector<t_complex>::Random(number_of_vis) + I * Vector<t_complex>::Random(number_of_vis);
@@ -61,8 +67,15 @@ int main(int nargs, char const **args) {
   for(t_int i = 0; i < number_of_tests; ++i) {
     auto uv_data = utilities::random_sample_density(number_of_vis, 0, sigma_m);
     uv_data.units = "radians";
-    MeasurementOperator op(uv_data, J, J, kernel, width, height,
-                           over_sample); // Generating gridding matrix
+
+    auto const op = MeasurementOperator(uv_data)
+                        .Ju(J)
+                        .Jv(J)
+                        .kernel_name(kernel)
+                        .imsizex(width)
+                        .imsizey(height)
+                        .oversample_factor(over_sample);
+
     Image<t_complex> im
         = Matrix<t_complex>::Random(width, height) + I * Matrix<t_complex>::Random(width, height);
     std::clock_t c_start = std::clock();
