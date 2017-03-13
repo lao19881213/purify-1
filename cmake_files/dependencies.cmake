@@ -85,3 +85,5 @@ find_package(CasaCore OPTIONAL_COMPONENTS ms)
 
 # Add script to execute to make sure libraries in the build tree can be found
 add_to_ld_path("${EXTERNAL_ROOT}/lib")
+lookup_package(Docopt REQUIRED)
+

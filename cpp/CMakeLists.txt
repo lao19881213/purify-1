@@ -34,6 +34,18 @@ if(tests)
   add_subdirectory(tests)
 endif()
 
+
+add_executable(purify main2.cc)
+target_link_libraries(purify libpurify docopt_s)
+set_target_properties(purify PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+
+install(TARGETS purify
+  EXPORT PurifyTargets
+  DESTINATION share/cmake/Purify
+  RUNTIME DESTINATION bin
+  )
+
+
 if(TARGET casacore::ms)
   add_executable(purify main.cc cmdl.cc AlgorithmUpdate.cc)
   target_link_libraries(purify libpurify)
