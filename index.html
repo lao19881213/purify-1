@@ -27,10 +27,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">PURIFY
    </div>
-   <div id="projectbrief">PURIFY</div>
+   <div id="projectbrief">Next-generation radio interferometric imaging</div>
   </td>
  </tr>
  </tbody>
@@ -86,7 +87,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">PURIFY Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h2>Description </h2>
+<div class="textblock"><p><a href="https://travis-ci.com/astro-informatics/purify">![Build Status](https://travis-ci.com/astro-informatics/purify.svg?branch=development)</a></p>
+<h2>Description </h2>
 <p><b>PURIFY</b> is an open-source collection of routines written in <code>C++</code> available under the <a href="#license">license</a> below. It implements different tools and high-level to perform radio interferometric imaging, <em>i.e.</em> to recover images from the Fourier measurements taken by radio interferometric telescopes.</p>
 <p><b>PURIFY</b> leverages recent developments in the field of compressive sensing and convex optimization. Low-level functionality to solve the resulting convex optimisation is factored into the open-source companion code, <a href="https://github.com/astro-informatics/sopt">**SOPT**</a>, also written by the authors of <b>PURIFY</b>. For further background please see the <a href="#references-and-citation">reference</a> section.</p>
 <p>This documentation outlines the necessary and optional <a href="#dependencies-installation">dependencies</a> upon which <b>PURIFY</b> should be built, before describing <a href="#installing-and-building-PURIFY">installation</a>, <a href="#testing">testing</a> and <a href="#usage">usage</a> details. <a href="#contributors">Contributors</a>, <a href="#references-and-citation">references</a> and <a href="#license">license</a> information then follows.</p>
@@ -104,9 +106,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li><a href="http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html">cfitsio</a> v* Library of <code>C</code> and <code>Fortran</code> subroutines for reading and writing data files in FITS (Flexible Image Transport System) data format. Downloaded automatically if absent.</li>
 <li><a href="http://casacore.github.io/casacore/">casacore</a> - Optional - Needed to interface with measurement sets. The main purify program requires this library (and its dependencies)</li>
 <li><a href="http://openmp.org/wp/">OpenMP</a> v4.8.4 (Trusty) - Optional - Speeds up some of the operations.</li>
-<li><a href="https://www.open-mpi.org">MPI</a> v* (Trusty) - Optional - Parallelisation paradigm to speed up operations.</li>
+<li><a href="https://www.open-mpi.org">MPI</a> v3.1.1 (Trusty) - Optional - Parallelisation paradigm to speed up operations.</li>
 <li><a href="https://github.com/gabime/spdlog">spdlog</a> v* - Optional - Logging library. Downloaded automatically if absent.</li>
-<li><a href="https://github.com/philsquared/Catch">philsquared/Catch</a> v2.2.3 - Optional - A <code>C++</code> unit-testing framework only needed for testing. Downloaded automatically if absent.</li>
+<li><a href="https://github.com/catchorg/Catch2">Catch2</a> v2.2.3 - Optional - A <code>C++</code> unit-testing framework only needed for testing. Downloaded automatically if absent.</li>
 <li><a href="https://github.com/google/benchmark">google/benchmark</a> - Optional - A <code>C++</code> micro-benchmarking framework only needed for benchmarks. Downloaded automatically if absent.</li>
 </ul>
 <h2>Installing and building PURIFY </h2>
@@ -142,7 +144,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <h2>CMake Tips </h2>
 <p>It is possible to tell <code>CMake</code> exactly which libraries to compile and link against. The general idea is to add <code>-DVARIABLE=something</code> to the command-line arguments of CMake. CMake can be called any number of times: previous settings will not be overwritten unless specifically requested. Some of the more common options are the following:</p>
 <ul>
-<li><code>CMAKE_PREFIX_PATH</code>: CMake will look in "CMAKE\_PREFIX\_PATH/lib" for libraries, "CMAKE\_PREFIX\_PATH/include" for headers, etc.</li>
+<li><code>CMAKE_PREFIX_PATH</code>: CMake will look in "CMAKE_PREFIX_PATH/lib" for libraries, "CMAKE_PREFIX_PATH/include" for headers, etc.</li>
 <li><code>FFTW3_LIBRARIES</code>, <code>FFTW3_INCLUDE_DIR</code></li>
 <li><code>BLAS_INCLUDE_DIRS</code>, <code>BLAS_LIBRARIES</code></li>
 </ul>
