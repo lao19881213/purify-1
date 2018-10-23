@@ -96,27 +96,28 @@ var searchBox = new SearchBox("searchBox", "../../search",false,'Search');
 <div class="title">show_image.cc</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#include &quot;purify/types.h&quot;</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#include &quot;purify/cimg.h&quot;</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &quot;purify/directories.h&quot;</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;purify/pfitsio.h&quot;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="keyword">using namespace </span>purify;</div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">using namespace </span>purify::notinstalled;</div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keywordtype">int</span> main(<span class="keywordtype">int</span> nargs, <span class="keywordtype">char</span> <span class="keyword">const</span> **args) {</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;  <span class="comment">// up samples M31 example</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;  std::string <span class="keyword">const</span> fitsfile = image_filename(<span class="stringliteral">&quot;M31.fits&quot;</span>);</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;  std::string <span class="keyword">const</span> fitsfile2 = image_filename(<span class="stringliteral">&quot;M31_512.fits&quot;</span>);</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;  Image&lt;t_real&gt; <span class="keyword">const</span> M31 = pfitsio::read2d(fitsfile).real();</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;  Image&lt;t_real&gt; <span class="keyword">const</span> M31_large = pfitsio::read2d(fitsfile2).real();</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#ifdef PURIFY_CImg</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor"></span>  CDisplay display = cimg::make_display&lt;Image&lt;t_real&gt;&gt;(M31, <span class="stringliteral">&quot;M31 small&quot;</span>);</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;  <span class="keywordflow">while</span> (!display.is_closed()) {</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    <span class="keywordflow">if</span> (display.is_key())</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;      display = cimg::make_display&lt;Image&lt;t_real&gt;&gt;(M31_large, <span class="stringliteral">&quot;Image of M31 large&quot;</span>);</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;  }</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor"></span>}</div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#include &quot;purify/config.h&quot;</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#include &quot;purify/types.h&quot;</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &quot;purify/cimg.h&quot;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;purify/directories.h&quot;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &quot;purify/pfitsio.h&quot;</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">using namespace </span>purify;</div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">using namespace </span>purify::notinstalled;</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keywordtype">int</span> main(<span class="keywordtype">int</span> nargs, <span class="keywordtype">char</span> <span class="keyword">const</span> **args) {</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;  <span class="comment">// up samples M31 example</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;  std::string <span class="keyword">const</span> fitsfile = image_filename(<span class="stringliteral">&quot;M31.fits&quot;</span>);</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;  std::string <span class="keyword">const</span> fitsfile2 = image_filename(<span class="stringliteral">&quot;M31_512.fits&quot;</span>);</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;  Image&lt;t_real&gt; <span class="keyword">const</span> M31 = pfitsio::read2d(fitsfile).real();</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;  Image&lt;t_real&gt; <span class="keyword">const</span> M31_large = pfitsio::read2d(fitsfile2).real();</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#ifdef PURIFY_CImg</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor"></span>  CDisplay display = cimg::make_display&lt;Image&lt;t_real&gt;&gt;(M31, <span class="stringliteral">&quot;M31 small&quot;</span>);</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;  <span class="keywordflow">while</span> (!display.is_closed()) {</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="keywordflow">if</span> (display.is_key())</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;      display = cimg::make_display&lt;Image&lt;t_real&gt;&gt;(M31_large, <span class="stringliteral">&quot;Image of M31 large&quot;</span>);</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;  }</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor"></span>}</div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
